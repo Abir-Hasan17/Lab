@@ -1,5 +1,5 @@
 #curve: y^2 = x^3 + ax + b mod p.
-p = 17
+p = 97
 a = 2
 b = 2
 O = None
@@ -66,9 +66,6 @@ def point_neg(point):
     x, y = point
     return (x, (-y) % p)
 
-
-
-
 # Example usage
 
 # affine points and their orders
@@ -77,7 +74,7 @@ for point in affine_points:
     order = point_order(point)
     print(f"Point: {point} order: {order}")
 
-G = (5,1)  # Generator point of high order
+G = (0,14)  # Generator point of high order
 assert is_on_curve(G), "Generator point G is not on the curve."
 
 P = G
@@ -94,6 +91,7 @@ print(f"T = 4G = {T}")
 print("order of G:", n)
 
 # Key exchange example
+print()
 
 PRa = 9 # < n
 PUa = point_multiplication(G, PRa)
@@ -113,6 +111,7 @@ print("Alice's shared secret:", Alice_shared_secret)
 print("Bob's shared secret:", Bob_shared_secret)
 
 # encryption decryption example
+print()
 
 def encrypt(PM, key, shared_key, G):
     PR, PU = key
@@ -128,11 +127,52 @@ def decrypt(CM, key, shared_key, G):
     PM = point_addition(C2, point_neg(S))
     return PM
 
-PM = (0, 6) # alices message, has to be on the curve
+PM = (63, 77) # alices message, has to be on the curve
+assert is_on_curve(PM), "Plain text PM is not on the curve."
 CM = encrypt(PM, key_alice, Alice_shared_secret, G)
 print("Plain text", PM,"Cypher text", CM)
 
 decrypted_PM = decrypt(CM, key_bob, Bob_shared_secret, G)
 print("Cypher text", CM, "Decrypted plain text", decrypted_PM) 
+
+# Text encryption and decryption probably not important, but here it is
+print()
+def char_to_point(c):
+    c = c.upper()
+    x = ord(c) - ord('A') + 1  # Convert character to a number (1-26)
+    while x < p:
+        rhs = (x ** 3 + a * x + b) % p
+        for y in range(p):
+            if (y * y) % p == rhs:
+                return (x, y)
+        x += 1
+    raise ValueError(f"Could not encode character '{c}' on the curve")
+
+def point_to_char(point):
+    x, _ = point
+    return chr(x + ord('A') - 1)  # Convert number back to character (1-26)
+
+def encrypt_text(text, key, shared_key, G):
+    cypher = []
+    for c in text:
+        PM = char_to_point(c)
+        CM = encrypt(PM, key, shared_key, G)
+        cypher.append(CM)
+    return cypher
+
+def decrypt_text(cypher, key, shared_key, G):
+    plain_text = ""
+    for CM in cypher:
+        PM = decrypt(CM, key, shared_key, G)
+        plain_text += point_to_char(PM)
+    return plain_text
+
+text = "Hello"
+cypher_text = encrypt_text(text, key_alice, Alice_shared_secret, G)
+print("Text:", text)
+print("Cypher text:", cypher_text)
+
+decrypted_text = decrypt_text(cypher_text, key_bob, Bob_shared_secret, G)
+print("Decrypted text:", decrypted_text)
 
 
