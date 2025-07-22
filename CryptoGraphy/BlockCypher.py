@@ -118,5 +118,38 @@ print("Ciphertext:", ciphertext)
 plaintext = cfb_decrypt(key, ciphertext, iv)
 print("Decrypted plaintext:", plaintext)
 
+# Simple OFB
 
+def ofb_encrypt(key, plaintext, iv):
+    padded = padd(plaintext)
+    ciphertext = b""
+    prev = iv
 
+    for i in range(0, len(padded), B):
+        prev = xor_block(prev, key) # encrypt the IV and feed it back
+        block = padded[i:i+B]
+        encrypted = xor_block(block, prev)
+        ciphertext += encrypted
+    return ciphertext
+
+def ofb_decrypt(key, ciphertext, iv):
+    plaintext = b""
+    prev = iv
+
+    for i in range(0, len(ciphertext), B):
+        prev = xor_block(prev, key) # encrypt the IV and feed it back
+        block = ciphertext[i:i+B]
+        decrypted = xor_block(block, prev)
+        plaintext += decrypted
+    return unpadd(plaintext)
+
+print("\nOFB Mode Encryption/Decryption Example")
+iv = b"initialvectr"
+text = b"Hello, World!"
+key = b"secret"
+
+ciphertext = ofb_encrypt(key, text, iv)
+print("Ciphertext:", ciphertext)
+
+plaintext = ofb_decrypt(key, ciphertext, iv)
+print("Decrypted plaintext:", plaintext)
