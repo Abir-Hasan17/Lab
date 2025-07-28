@@ -6,22 +6,23 @@ def gen_matrix(key):
     key = key.upper()
     matrix = []
     added = set()
+    added.add("I")
+
     for char in key:
         if char not in added:
             matrix.append(char)
-        else:
             added.add(char)
+
     for char in string.ascii_uppercase:
         if char not in added:
             matrix.append(char)
-        else:
             added.add(char)
+
     return [matrix[i:i+5] for i in range(0, 25, 5)]
 
 def find_pos(char, matrix):
     for i in range(5):
         for j in range(5):
-            print(i,j)
             if char == matrix[i][j]:
                 return i,j
             
@@ -55,7 +56,7 @@ def playfair_encrypt(text, key):
     for i in range(0, len(text), 2):
         a, b = text[i], text[i+1]
         # print(f"Encrypting pair: {a}, {b}")
-        cyphertext += encrypt_decrypt_pair(matrix, a, b, 1)
+        cyphertext += encrypt_decrypt_pair(a, b, matrix, 1)
     return cyphertext
 
 def playfair_decrypt(text, key):
@@ -63,7 +64,7 @@ def playfair_decrypt(text, key):
     plaintext = ''
     for i in range(0, len(text), 2):
         a, b = text[i], text[i+1]
-        plaintext += encrypt_decrypt_pair(matrix, a, b, -1)
+        plaintext += encrypt_decrypt_pair(a, b, matrix, -1)
     return plaintext
 
 key = "PLAYFAIR"
