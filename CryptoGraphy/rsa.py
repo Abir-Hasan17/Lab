@@ -1,27 +1,6 @@
 from math import gcd
 import random
 
-
-def modular_inverse(a, m):
-    m0, x0, x1 = m, 0, 1
-
-    while a>1:
-        q = a//m
-        a, m = m, a%m
-        x0, x1 = x1 - q*x0, x0
-    
-    return x1%m0
-
-def power(base, exp, mod):
-    res = 1
-    base = base % mod
-    while exp>0:
-        if exp%2 ==1:
-            res = (res*base) % mod
-        base = (base*base) % mod
-        exp = exp//2
-    return res
-
 def gen_key(p, q):
     n = p*q
     phi = (p-1)*(q-1)
@@ -30,13 +9,13 @@ def gen_key(p, q):
         e = random.randint(2, phi-1)
         if gcd(phi, e) != 1:
             continue
-        d = modular_inverse(e, phi)
+        d = pow(e, -1, phi) # Modular inverse
         if e != d: break
     return (e, n), (d, n)
 
 def rsa_encrypt_dycrypt(data, key):
     k, n = key
-    return power(data, k, n)
+    return pow(data, k, n) # Encrypt or decrypt using modular exponentiation
 
 def rsa_text_encrypt(text, key):
     encrypted_data = []
